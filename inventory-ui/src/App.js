@@ -7,6 +7,7 @@ import Login from './Login';
 import Items from './Items';
 import Item from './Item';
 import CreateItem from './CreateItem';
+import Register from './Register';
 
 export const AuthContext = createContext();
 
@@ -19,10 +20,11 @@ function App() {
         <Routes>
           <Route path='/' element={<HomeBar />} >
             <Route path='/login' element={<Login/>} />
-            <Route path='/items' element={<Items/>} />
+            <Route path='/register' element={<Register/>} />
+            <Route path='/items' element={<Items type='all'/>} key='allItems'/>
             <Route path='/items/:id' element={<Item/>} />
             <Route path='/createItem' element={<CreateItem/>} />
-            <Route path='/myItems' element={<Items/>} />
+            <Route path='/myItems' element={<Items type='user'/>} key='myItems'/>
           </Route>
         </Routes>
       </Router>

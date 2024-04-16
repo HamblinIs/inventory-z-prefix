@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { AuthContext } from "./App";
 
 const HomeBar = () => {
+
+    const {user} = useContext(AuthContext);
 
     const navigate = useNavigate();
     return (
@@ -11,7 +14,7 @@ const HomeBar = () => {
             <button onClick={() => navigate('/items')}>All Items</button>
             <button onClick={() => navigate('/myItems')}>My Items</button>
             <button onClick={() => navigate('/createItem')}>Create Item</button>
-            <button onClick={() => navigate('/login')}>Login</button>
+            {user.id ? <></> : <button onClick={() => navigate('/login')}>Login</button>}
         </div>
         <Outlet />
         </>

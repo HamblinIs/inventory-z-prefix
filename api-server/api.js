@@ -96,10 +96,14 @@ api.post("/auth/signin", (req, res) => {
     const {username, password} = req.body;
     knex("user_account").select("*").where({username: username})
     .then((dbRes) => {
-        if (dbRes[0].password === password) {
-            res.status(201).json({status: "Authenticated"})
-        } else {
-            res.status(400).json({status: "Password did not match"});
+        try {
+            if (dbRes[0].password === password) {
+                res.status(201).json({status: "Authenticated", userData: dbRes[0]})
+            } else {
+                res.status(400).json({status: "Password did not match"});
+            }
+        } catch {
+            res.status(400).json({status: "Bad Request"});
         }
     })
 })
