@@ -7,10 +7,10 @@ const Items = ({type}) => {
 
     const {user} = useContext(AuthContext);
     const [items, setItems] = useState([]);
-    const [fetchEndpoint, setFetchEndpoint] = useState("http://localhost:8080/items");
+    let endpoint = type === 'user' && user.id ? `http://localhost:8080/user/${user.id}/items` : "http://localhost:8080/items";
+    const [fetchEndpoint, setFetchEndpoint] = useState(endpoint);
 
     // Probably do this differently if there is more than two types
-    
 
     useEffect(() => {
         fetch(fetchEndpoint)
@@ -19,7 +19,7 @@ const Items = ({type}) => {
     }, [fetchEndpoint])
 
     useEffect(() => {
-       let endpoint = type === 'user' && user.id ? `http://localhost:8080/user/${user.id}/items` : "http://localhost:8080/items";
+        let endpoint = type === 'user' && user.id ? `http://localhost:8080/user/${user.id}/items` : "http://localhost:8080/items";
        setFetchEndpoint(endpoint);
     }, [type])
 

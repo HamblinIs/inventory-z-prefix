@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const api = express();
 const port = process.env.PORT || 8080;
 const knex = require("knex")(
@@ -8,6 +9,8 @@ const cors = require("cors");
 
 api.use(express.json());
 api.use(cors());
+
+const saltRounds = 10;
 
 api.get("/", function (req, res) {
     res.send("DATABASE ONLINE");
@@ -77,11 +80,18 @@ api.patch("/items/:id", (req, res) => {
 */
 api.post("/auth/signup", (req, res) => {
     try {
-        const {first, last, username, password} = req.body;
-        knex("user_account").insert({first_name: first, last_name: last, username: username, password: password})
-        .then(res.status(201).json({status: "Authenticated"}))
-        .catch(err => res.status(500));
+        const {first_name, last_name, username, password} = req.body;
+        const hash = bcrypt.hashSync(password, saltRounds);
+
+        knex("user_account").insert({first_name: first_name, last_name: last_name, username: username, password: hash})
+        .then(dbRes => {
+            knex("user_account").select("*").where({username: username})
+            .then(dbRes => res.status(201).json({status: "Authenticated", userData: dbRes[0]}))
+        })
+        .catch(err => res.status(500))
+
     } catch (err) {
+        console.log(err);
         res.status(400).json({error: err})
     }
 })
@@ -97,7 +107,7 @@ api.post("/auth/signin", (req, res) => {
     knex("user_account").select("*").where({username: username})
     .then((dbRes) => {
         try {
-            if (dbRes[0].password === password) {
+            if (bcrypt.compareSync(password, dbRes[0].password)) {
                 res.status(201).json({status: "Authenticated", userData: dbRes[0]})
             } else {
                 res.status(400).json({status: "Password did not match"});
@@ -117,12 +127,9 @@ api.post("/auth/signin", (req, res) => {
     }
 */
 api.post("/items", (req, res) => {
-    const {username, item_name, description, quantity} = req.body;
-    knex("user_account").select("*").where({username: username})
-    .then(dbRes => {
-        knex("item").insert({user_id: dbRes[0].id, item_name: item_name, description: description, quantity: quantity})
+    const {user_id, item_name, description, quantity} = req.body;
+    knex("item").insert({user_id: user_id, item_name: item_name, description: description, quantity: quantity})
         .then(res.status(201).json({status: "Succesfully created Item"}));
-    })
 })
 
 api.listen(port, () =>
